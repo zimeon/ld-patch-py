@@ -137,7 +137,12 @@ class PatchProcessor(object):
             # so this is not stricly speaking a ParserError,
             # but rather a semantic error, hence its processing here
             try:
-                parse_iri(unicode(element), rule="IRI")
+                e = element
+                try:
+                    e = unicode(element)
+                except:
+                    pass  # FIXME - hack for python3
+                parse_iri(e, rule="IRI")
             except ValueError as ex:
                 raise PatchEvalError(ex.message)
             ret = element
@@ -216,7 +221,7 @@ class PatchProcessor(object):
             raise
         if len(nodeset) != 1:
             raise NoUniqueMatchError(variable, "end", nodeset)
-        self._variables[variable] =  iter(nodeset).next()
+        self._variables[variable] =  next(iter(nodeset))
 
     def add(self, add_graph, addnew=False):
         """Process an Add or AnnNew command"""

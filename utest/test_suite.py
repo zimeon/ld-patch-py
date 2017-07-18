@@ -26,7 +26,11 @@ The test suite can be downloaded from
 """
 from os.path import abspath, dirname, exists, join
 from unittest import skip, TestCase
-from urllib import pathname2url, urlopen
+try:
+    from urllib import pathname2url, urlopen  # python2
+except:
+    from urllib.request import pathname2url, urlopen  # python2
+from nose import SkipTest
 
 from rdflib import Graph, Namespace, RDF, URIRef
 from rdflib.collection import Collection
@@ -147,6 +151,10 @@ if exists(TESTSUITE_PATH):
                     parser = Parser(processor, base_iri, True)
                     try:
                         parser.parseString(patch)
+                    except ValueError as ex:
+                        if ("narrow Python build" in str(ex)):
+                            raise SkipTest("narrow Python build")
+                        raise ex
                     except ParserError as ex:
                         raise Exception("ParseError: {}\n  in <{}>".format(
                             ex.message,

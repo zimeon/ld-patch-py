@@ -55,13 +55,18 @@ RDF_NIL = rdflib.RDF.nil
 # http://www.w3.org/TR/2013/REC-sparql11-query-20130321/
 
 PLX = Regex(r"%[0-9a-fA-F]{2}|\\[_~.\-!$&\'()*+,;=/?#@%]")
-PN_CHARS_BASE= Regex(r'[A-Z]|[a-z]|[\u00C0-\u00D6]|[\u00D8-\u00F6]|'
-                     r'[\u00F8-\u02FF]|[\u0370-\u037D]|[\u037F-\u1FFF]|'
-                     r'[\u200C-\u200D]|[\u2070-\u218F]|[\u2C00-\u2FEF]|'
-                     r'[\u3001-\uD7FF]|[\uF900-\uFDCF]|[\uFDF0-\uFFFD]|'
-                     r'[\U00010000-\U000EFFFF]', flags=UNICODE)
+_narrow_pn_chars_base = (u'[A-Z]|[a-z]|[\u00C0-\u00D6]|[\u00D8-\u00F6]|'
+                         u'[\u00F8-\u02FF]|[\u0370-\u037D]|[\u037F-\u1FFF]|'
+                         u'[\u200C-\u200D]|[\u2070-\u218F]|[\u2C00-\u2FEF]|'
+                         u'[\u3001-\uD7FF]|[\uF900-\uFDCF]|[\uFDF0-\uFFFD]')
+try:
+    PN_CHARS_BASE= Regex(_narrow_pn_chars_base +
+                         u'|[\U00010000-\U000EFFFF]')
+except:
+    PN_CHARS_BASE= Regex(_narrow_pn_chars_base)  # narrow Python build
+
 PN_CHARS_U = PN_CHARS_BASE | '_'
-PN_CHARS = PN_CHARS_U | '-' | Regex(r'[0-9]|\u00B7|[\u0300-\u036F]|[\u203F-\u2040]', flags=UNICODE)
+PN_CHARS = PN_CHARS_U | '-' | Regex(u'[0-9]|\u00B7|[\u0300-\u036F]|[\u203F-\u2040]')
 
 # NB: PN_PREFIX, PN_LOCAL and BLANK_NODE_LABEL are defined
 # in a slightly different way than in the SPARQL grammar,
@@ -403,7 +408,7 @@ class Parser(object):
         subj = rdflib.BNode()
         property_list = iter(toks)
         for pred in property_list:
-            objlist = property_list.next()
+            objlist = next(property_list)
             for obj in objlist:
                 add((subj, pred, obj))
         return subj
@@ -426,9 +431,9 @@ class Parser(object):
         graph = self.get_current_graph()
         add = graph.add
         property_list = iter(toks.asList())
-        subj = property_list.next()
+        subj = next(property_list)
         for pred in property_list:
-            objlist = property_list.next()
+            objlist = next(property_list)
             for obj in objlist:
                 add((subj, pred, obj))
         return []
@@ -510,7 +515,10 @@ class Parser(object):
     def parseString(self, txt):
         """Parse txt as an LD Patch and apply it"""
         if type(txt) is str:
-            txt = txt.decode("utf8")
+            try:
+                txt = txt.decode("utf8")
+            except:
+                pass  # FIXME - hack for python3
         try:
             self.grammar.parseString(txt, True)
         except ParseException as ex:

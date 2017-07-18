@@ -22,9 +22,12 @@ Python implementation of LD Patch.
 # pylint: disable=W0622,R0913
 
 from os.path import abspath
-from urllib import pathname2url
+try:
+    from urllib import pathname2url  # python2
+except:
+    from urllib.request import pathname2url  # python3
 
-__version__ = "0.9"
+__version__ = "0.9.1"
 
 def apply(patch, graph, baseiri=None, init_ns=None, init_var=None, syntax="default"):
     """

@@ -41,7 +41,7 @@ Parser has a ``reset`` method that allows to restart it afresh.
 """
 from pyparsing import CaselessKeyword, Combine, Forward, Group, Keyword, Literal, OneOrMore, \
     Optional, ParseException, Regex, restOfLine, Suppress, ZeroOrMore
-from re import compile as regex, VERBOSE
+from re import compile as regex, VERBOSE, UNICODE
 
 import rdflib
 from rdflib.collection import Collection as RdfCollection
@@ -55,13 +55,13 @@ RDF_NIL = rdflib.RDF.nil
 # http://www.w3.org/TR/2013/REC-sparql11-query-20130321/
 
 PLX = Regex(r"%[0-9a-fA-F]{2}|\\[_~.\-!$&\'()*+,;=/?#@%]")
-PN_CHARS_BASE= Regex(ur'[A-Z]|[a-z]|[\u00C0-\u00D6]|[\u00D8-\u00F6]|'
-                     ur'[\u00F8-\u02FF]|[\u0370-\u037D]|[\u037F-\u1FFF]|'
-                     ur'[\u200C-\u200D]|[\u2070-\u218F]|[\u2C00-\u2FEF]|'
-                     ur'[\u3001-\uD7FF]|[\uF900-\uFDCF]|[\uFDF0-\uFFFD]|'
-                     ur'[\U00010000-\U000EFFFF]')
+PN_CHARS_BASE= Regex(r'[A-Z]|[a-z]|[\u00C0-\u00D6]|[\u00D8-\u00F6]|'
+                     r'[\u00F8-\u02FF]|[\u0370-\u037D]|[\u037F-\u1FFF]|'
+                     r'[\u200C-\u200D]|[\u2070-\u218F]|[\u2C00-\u2FEF]|'
+                     r'[\u3001-\uD7FF]|[\uF900-\uFDCF]|[\uFDF0-\uFFFD]|'
+                     r'[\U00010000-\U000EFFFF]', flags=UNICODE)
 PN_CHARS_U = PN_CHARS_BASE | '_'
-PN_CHARS = PN_CHARS_U | '-' | Regex(ur'[0-9]|\u00B7|[\u0300-\u036F]|[\u203F-\u2040]')
+PN_CHARS = PN_CHARS_U | '-' | Regex(r'[0-9]|\u00B7|[\u0300-\u036F]|[\u203F-\u2040]', flags=UNICODE)
 
 # NB: PN_PREFIX, PN_LOCAL and BLANK_NODE_LABEL are defined
 # in a slightly different way than in the SPARQL grammar,
@@ -200,10 +200,10 @@ def parse_slice(s, loc, toks):
 
 
 # unescaping
-IRI_ESCAPE_SEQ = regex(ur"\\u([0-9A-Fa-f]{4}) | \\U([0-9A-Fa-f]{8})", VERBOSE)
-LOCAL_ESCAPE_SEQ = regex(ur"\\([_~.\-!$&'()*+,;=/?#@%])", VERBOSE)
-STRING_ESCAPE_SEQ = regex(ur"\\u([0-9A-Fa-f]{4}) | \\U([0-9A-Fa-f]{8}) "
-                          ur" | \\([tbnrf\\\"'])", VERBOSE)
+IRI_ESCAPE_SEQ = regex(r"\\u([0-9A-Fa-f]{4}) | \\U([0-9A-Fa-f]{8})", VERBOSE | UNICODE)
+LOCAL_ESCAPE_SEQ = regex(r"\\([_~.\-!$&'()*+,;=/?#@%])", VERBOSE | UNICODE)
+STRING_ESCAPE_SEQ = regex(r"\\u([0-9A-Fa-f]{4}) | \\U([0-9A-Fa-f]{8}) "
+                          r" | \\([tbnrf\\\"'])", VERBOSE | UNICODE)
 STRING_UNESCAPE_MAP = { "t": "\t", "b": "\b", "n": "\n", "r": "\r", "f": "\f",
                         "\\": "\\", '"': '"', "'": "'" }
 
@@ -468,7 +468,7 @@ class Parser(object):
             self.processor.add(
                 self.get_current_graph(clear=True, check_empty=True),
                 addnew=False)
-        except TypeError, ex:
+        except TypeError as ex:
             raise Exception(ex)
 
     def _do_add_new(self, s, loc, toks):
@@ -513,7 +513,7 @@ class Parser(object):
             txt = txt.decode("utf8")
         try:
             self.grammar.parseString(txt, True)
-        except ParseException, ex:
+        except ParseException as ex:
             raise ParserError(ex)
 
 class ParserError(Exception):

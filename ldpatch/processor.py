@@ -138,7 +138,7 @@ class PatchProcessor(object):
             # but rather a semantic error, hence its processing here
             try:
                 parse_iri(unicode(element), rule="IRI")
-            except ValueError, ex:
+            except ValueError as ex:
                 raise PatchEvalError(ex.message)
             ret = element
         else:
@@ -211,7 +211,7 @@ class PatchProcessor(object):
         try:
             for step in path:
                 nodeset = self.do_path_step(nodeset, step)
-        except NoUniqueMatchError, ex:
+        except NoUniqueMatchError as ex:
             ex.variable = variable
             raise
         if len(nodeset) != 1:
@@ -352,7 +352,7 @@ class PatchProcessor(object):
                 target.add((spre, ppre, fst))
                 target.set((lst, RDF.rest, opost))
 
-        except UniquenessError, ex:
+        except UniquenessError as ex:
             raise MalformedListError(ex.msg)
 
 

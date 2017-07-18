@@ -120,7 +120,7 @@ if exists(TESTSUITE_PATH):
                     parser = Parser(DummyProcessor(), action, True)
                     try:
                         parser.parseString(patch)
-                    except ParserError, ex:
+                    except ParserError as ex:
                         assert False, "{} in <{}>".format(ex, action)
             elif etype == NS.NegativeSyntaxTest:
                 def test_X(self, entry=entry):
@@ -147,7 +147,7 @@ if exists(TESTSUITE_PATH):
                     parser = Parser(processor, base_iri, True)
                     try:
                         parser.parseString(patch)
-                    except ParserError, ex:
+                    except ParserError as ex:
                         raise Exception("ParseError: {}\n  in <{}>".format(
                             ex.message,
                             patch_iri
@@ -174,7 +174,7 @@ if exists(TESTSUITE_PATH):
                         assert False, 'expected PatchEvalError in <{}>'.format(
                             patch_iri
                         )
-                    except PatchEvalError, ex:
+                    except PatchEvalError as ex:
                         assert ex.statusCode == statusCode, \
                             "Expected statusCode {}, got {}".format(
                                 statusCode, ex.statusCode)

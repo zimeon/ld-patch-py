@@ -41,4 +41,6 @@ setup(name = 'ldpatch',
       include_package_data=True,
       install_requires=INSTALL_REQ,
       scripts=['bin/ldpatch-apply'],
+      tests_require=['nose'],
+      test_suite='nose.collector'
      )

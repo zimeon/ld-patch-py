@@ -1,1 +1,6 @@
 ld-patch-testsuite/
+.cache/
+.eggs/
+build/
+dist/
+ldpatch.egg-info/
